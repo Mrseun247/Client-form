@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Website Development — Client Intake Form</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #0D1B2A;
+    --blue:   #1565C0;
+    --lblue:  #1E88E5;
+    --accent: #42A5F5;
+    --sky:    #E3F2FD;
+    --silver: #ECEFF1;
+    --lgray:  #F5F7FA;
+    --mgray:  #B0BEC5;
+    --dgray:  #546E7A;
+    --white:  #FFFFFF;
+    --text:   #0D1B2A;
+    --border: #CFD8DC;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(21,101,192,.10);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--lgray);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ───────────────────────────────────────── */
+  .header {
+    background: var(--navy);
+    padding: 28px 24px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(66,165,245,.18) 0%, transparent 70%);
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 5vw, 36px);
+    color: var(--white);
+    letter-spacing: -.5px;
+    position: relative;
+  }
+  .header p {
+    color: var(--accent);
+    font-size: 13px;
+    margin-top: 6px;
+    position: relative;
+    font-weight: 500;
+    letter-spacing: .4px;
+  }
+
+  /* ── PROGRESS ─────────────────────────────────────── */
+  .progress-wrap {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+  }
+  .progress-count {
+    font-size: 12px;
+    color: var(--dgray);
+    font-weight: 500;
+  }
+  .progress-bar-bg {
+    height: 6px;
+    background: var(--silver);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--accent));
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .step-dots {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--silver);
+    transition: all .3s;
+    cursor: pointer;
+  }
+  .step-dot.done  { background: var(--accent); }
+  .step-dot.active { background: var(--blue); transform: scale(1.4); }
+
+  /* ── MAIN LAYOUT ──────────────────────────────────── */
+  .main { max-width: 720px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  /* ── STEP CARD ────────────────────────────────────── */
+  .step { display: none; }
+  .step.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--sky);
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(21,101,192,.15);
+  }
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(20px, 4vw, 28px);
+    color: var(--navy);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: var(--dgray);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  /* ── FORM ELEMENTS ────────────────────────────────── */
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .field .hint {
+    font-size: 11px;
+    color: var(--mgray);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="tel"],
+  .field input[type="url"],
+  .field input[type="date"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--lblue);
+    box-shadow: 0 0 0 3px rgba(30,136,229,.12);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+
+  .field select { cursor: pointer; }
+
+  /* two-col grid */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:520px){ .grid2 { grid-template-columns: 1fr; } }
+
+  /* ── CHECKBOX GRID ────────────────────────────────── */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all .18s;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dgray);
+    user-select: none;
+  }
+  .check-item:hover { border-color: var(--accent); background: var(--sky); color: var(--navy); }
+  .check-item.selected { border-color: var(--blue); background: var(--sky); color: var(--blue); }
+  .check-item .check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .18s;
+    font-size: 11px;
+  }
+  .check-item.selected .check-box {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+  }
+
+  /* ── RADIO ────────────────────────────────────────── */
+  .radio-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 99px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dgray);
+    transition: all .18s;
+    user-select: none;
+  }
+  .radio-item:hover { border-color: var(--accent); color: var(--navy); }
+  .radio-item.selected { border-color: var(--blue); background: var(--sky); color: var(--blue); font-weight: 600; }
+  .radio-dot {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all .18s;
+  }
+  .radio-item.selected .radio-dot {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+
+  /* ── RATING ───────────────────────────────────────── */
+  .rating-group { margin-bottom: 16px; }
+  .rating-label { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .rating-stars { display: flex; gap: 6px; }
+  .star-btn {
+    width: 38px; height: 38px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dgray);
+    cursor: pointer;
+    transition: all .18s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .star-btn:hover { border-color: var(--accent); background: var(--sky); color: var(--blue); }
+  .star-btn.active { background: var(--blue); border-color: var(--blue); color: white; }
+
+  /* ── YES/NO ───────────────────────────────────────── */
+  .yn-field { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .yn-label { font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; min-width: 180px; }
+  .yn-options { display: flex; gap: 6px; }
+  .yn-btn {
+    padding: 7px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 99px;
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dgray);
+    cursor: pointer;
+    transition: all .18s;
+  }
+  .yn-btn:hover { border-color: var(--accent); }
+  .yn-btn.yes.active  { background: #1B5E20; border-color: #1B5E20; color: white; }
+  .yn-btn.no.active   { background: #B71C1C; border-color: #B71C1C; color: white; }
+  .yn-btn.ns.active   { background: var(--dgray); border-color: var(--dgray); color: white; }
+
+  /* ── DIVIDER ──────────────────────────────────────── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* ── NOTE BOX ─────────────────────────────────────── */
+  .note-box {
+    background: var(--sky);
+    border: 1px solid rgba(21,101,192,.2);
+    border-left: 4px solid var(--blue);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--blue);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* ── NAV BUTTONS ──────────────────────────────────── */
+  .nav-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .btn {
+    padding: 13px 28px;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-outline {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    color: var(--dgray);
+  }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--lblue));
+    color: white;
+    box-shadow: 0 4px 14px rgba(21,101,192,.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(21,101,192,.4); }
+  .btn-success {
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
+    color: white;
+    box-shadow: 0 4px 14px rgba(27,94,32,.3);
+  }
+
+  /* ── SUBMIT SCREEN ────────────────────────────────── */
+  #submit-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeUp .5s ease;
+  }
+  .success-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 32px rgba(27,94,32,.25);
+  }
+  #submit-screen h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+  #submit-screen p { color: var(--dgray); font-size: 14px; line-height: 1.7; max-width: 480px; margin: 0 auto 28px; }
+  .summary-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: left;
+    max-width: 560px;
+    margin: 0 auto 24px;
+    box-shadow: var(--shadow);
+  }
+  .summary-box h3 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+  .summary-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--silver); font-size: 13px; gap: 12px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row span:first-child { color: var(--dgray); font-weight: 500; }
+  .summary-row span:last-child  { color: var(--navy); font-weight: 600; text-align: right; }
+  .print-btn {
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .print-btn:hover { background: var(--blue); }
+
+  @media print {
+    .progress-wrap, .nav-btns, .print-btn { display: none !important; }
+    .step { display: block !important; page-break-inside: avoid; }
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Website Development</h1>
+  <p>CLIENT INFORMATION FORM &nbsp;·&nbsp; Fill all sections carefully</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span class="progress-label" id="progress-label">Section 1 of 12</span>
+    <span class="progress-count" id="progress-count">0% complete</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:8%"></div>
+  </div>
+  <div class="step-dots" id="step-dots"></div>
+</div>
+
+<div class="main">
+
+<!-- ═══ STEP 1: CONTACT INFO ══════════════════════════════════════════ -->
+<div class="step active" id="step-1">
+  <div class="section-badge">Section 1</div>
+  <h2 class="step-title">Client & Contact Information</h2>
+  <p class="step-desc">Who are we working with? Accurate details keep communication smooth throughout the project.</p>
+
+  <div class="field">
+    <label>Full Name / Business Name *</label>
+    <input type="text" id="s1_name" placeholder="e.g. Victory Montessori International School"/>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Contact Person</label>
+      <input type="text" id="s1_contact" placeholder="Day-to-day contact"/>
+    </div>
+    <div class="field">
+      <label>Job Title / Role</label>
+      <input type="text" id="s1_role" placeholder="e.g. CEO, Principal, Manager"/>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Primary Email Address *</label>
+      <input type="email" id="s1_email" placeholder="example@domain.com"/>
+    </div>
+    <div class="field">
+      <label>Secondary Email (optional)</label>
+      <input type="email" id="s1_email2" placeholder="backup@domain.com"/>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>WhatsApp / Phone Number *</label>
+      <input type="tel" id="s1_phone" placeholder="+234 XXX XXX XXXX"/>
+    </div>
+    <div class="field">
+      <label>Alternative Phone</label>
+      <input type="tel" id="s1_phone2" placeholder="Optional"/>
+    </div>
+  </div>
+  <div class="field">
+    <label>Business Address</label>
+    <input type="text" id="s1_address" placeholder="Street, City, State, Country"/>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>State / Region</label>
+      <input type="text" id="s1_state" placeholder="e.g. Osun State"/>
+    </div>
+    <div class="field">
+      <label>Country</label>
+      <input type="text" id="s1_country" placeholder="e.g. Nigeria"/>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Preferred Communication Channel</label>
+      <select id="s1_channel">
+        <option value="">Select channel...</option>
+        <option>WhatsApp</option>
+        <option>Email</option>
+        <option>Phone Call</option>
+        <option>Zoom</option>
+        <option>Google Meet</option>
+        <option>In-person</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Best Time to Reach You</label>
+      <input type="text" id="s1_time" placeholder="e.g. Weekdays 9AM – 5PM WAT"/>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 2: BUSINESS OVERVIEW ══════════════════════════════════════ -->
+<div class="step" id="step-2">
+  <div class="section-badge">Section 2</div>
+  <h2 class="step-title">Business / Organisation Overview</h2>
+  <p class="step-desc">Help us understand what you do so we can tell your story effectively on the website.</p>
+
+  <div class="field">
+    <label>Briefly describe what your business/organisation does *</label>
+    <textarea id="s2_desc" placeholder="What products or services do you offer? Who do you serve? What problem do you solve?"></textarea>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Year Established</label>
+      <input type="text" id="s2_year" placeholder="e.g. 2015"/>
+    </div>
+    <div class="field">
+      <label>Number of Employees / Team Size</label>
+      <input type="text" id="s2_size" placeholder="e.g. 1–10, 50+"/>
+    </div>
+  </div>
+  <div class="field">
+    <label>Industry / Niche</label>
+    <select id="s2_industry">
+      <option value="">Select industry...</option>
+      <option>Education / EdTech</option>
+      <option>Healthcare</option>
+      <option>Fashion & Retail</option>
+      <option>Food & Catering</option>
+      <option>Technology / Software</option>
+      <option>Real Estate</option>
+      <option>Finance / Fintech</option>
+      <option>NGO / Non-profit</option>
+      <option>Religious Organisation</option>
+      <option>Cleaning / Facility Services</option>
+      <option>Logistics / Transport</option>
+      <option>Agriculture</option>
+      <option>Beauty / Wellness</option>
+      <option>Creative / Media</option>
+      <option>Government / Public Sector</option>
+      <option>Other</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Business Registration Number (optional)</label>
+    <input type="text" id="s2_reg" placeholder="CAC or other registration number"/>
+  </div>
+  <div class="field">
+    <label>What makes your business unique? (Your USP)</label>
+    <textarea id="s2_usp" placeholder="What do you do better or differently than competitors?"></textarea>
+  </div>
+  <div class="field">
+    <label>List your top 3–5 products or services</label>
+    <textarea id="s2_services" placeholder="Name | Brief description | Price range&#10;1.&#10;2.&#10;3.&#10;4.&#10;5."></textarea>
+  </div>
+</div>
+
+<!-- ═══ STEP 3: WEBSITE PURPOSE ════════════════════════════════════════ -->
+<div class="step" id="step-3">
+  <div class="section-badge">Section 3</div>
+  <h2 class="step-title">Website Purpose & Goals</h2>
+  <p class="step-desc">Defining the "why" ensures we build exactly the right thing for your needs.</p>
+
+  <div class="field">
+    <label>Why do you need a website? What problem should it solve? *</label>
+    <textarea id="s3_why" placeholder="e.g. Customers can't find us online, we lose leads to competitors with websites, we want to accept bookings automatically..."></textarea>
+  </div>
+  <div class="field">
+    <label>Primary goal of the website (select all that apply)</label>
+    <div class="check-grid" id="goals-grid">
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Generate leads / inquiries</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Sell products online (e-commerce)</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Showcase portfolio / work</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Provide information / blog</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Accept bookings / appointments</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Build community / membership</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Collect donations</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Automate operations / portal</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>What does SUCCESS look like for this website?</label>
+    <textarea id="s3_success" placeholder="e.g. 50 inquiries/month, 100 daily visitors, 20% increase in online sales, save 5 hours/week on admin..."></textarea>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Target Launch Date</label>
+      <input type="date" id="s3_launch"/>
+    </div>
+    <div class="field">
+      <label>Is the deadline flexible?</label>
+      <div class="radio-row" id="s3_flex">
+        <div class="radio-item" onclick="selectRadio('s3_flex',this)"><div class="radio-dot"></div>Yes, flexible</div>
+        <div class="radio-item" onclick="selectRadio('s3_flex',this)"><div class="radio-dot"></div>No, fixed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 4: TARGET AUDIENCE ════════════════════════════════════════ -->
+<div class="step" id="step-4">
+  <div class="section-badge">Section 4</div>
+  <h2 class="step-title">Target Audience</h2>
+  <p class="step-desc">Who visits the site? Design, tone, and content all depend on knowing your audience.</p>
+
+  <div class="grid2">
+    <div class="field">
+      <label>Primary Age Group</label>
+      <select id="s4_age">
+        <option value="">Select range...</option>
+        <option>Under 18</option>
+        <option>18–25</option>
+        <option>25–35</option>
+        <option>35–50</option>
+        <option>50+</option>
+        <option>All ages</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Primary Gender</label>
+      <div class="radio-row" id="s4_gender">
+        <div class="radio-item" onclick="selectRadio('s4_gender',this)"><div class="radio-dot"></div>Mostly Male</div>
+        <div class="radio-item" onclick="selectRadio('s4_gender',this)"><div class="radio-dot"></div>Mostly Female</div>
+        <div class="radio-item" onclick="selectRadio('s4_gender',this)"><div class="radio-dot"></div>Mixed</div>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Geographic Location of Audience</label>
+    <input type="text" id="s4_location" placeholder="e.g. Nigeria, West Africa, Global, Osun State"/>
+  </div>
+  <div class="field">
+    <label>Education / Income Level (if relevant)</label>
+    <input type="text" id="s4_income" placeholder="e.g. University-educated, Middle-income, Business owners"/>
+  </div>
+  <div class="field">
+    <label>Describe your ideal customer / visitor in detail *</label>
+    <textarea id="s4_ideal" placeholder="Their challenges, desires, how they search for solutions, devices they commonly use, what matters to them..."></textarea>
+  </div>
+  <div class="field">
+    <label>Language(s) your audience speaks</label>
+    <input type="text" id="s4_lang" placeholder="e.g. English, Yoruba, Igbo, Hausa, Pidgin"/>
+    <p class="hint">This affects content writing and potentially UI language options</p>
+  </div>
+</div>
+
+<!-- ═══ STEP 5: PAGES ══════════════════════════════════════════════════ -->
+<div class="step" id="step-5">
+  <div class="section-badge">Section 5</div>
+  <h2 class="step-title">Required Pages</h2>
+  <p class="step-desc">Select every page you need on the website. You can always add more later during planning.</p>
+
+  <div class="field">
+    <label>Select all pages needed</label>
+    <div class="check-grid">
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Home / Landing Page</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>About Us</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Services / What We Offer</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Products Page</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Portfolio / Gallery</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Blog / News / Articles</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Testimonials / Reviews</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>FAQ Page</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Pricing / Packages</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Team / Staff Page</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Contact Us Page</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Booking / Appointment</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Events / Calendar</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Donations Page</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>User Login / Dashboard</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Admin Panel / CMS</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Privacy Policy & Terms</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Any custom pages not listed above?</label>
+    <textarea id="s5_custom_pages" placeholder="Name and purpose of each custom page..."></textarea>
+  </div>
+</div>
+
+<!-- ═══ STEP 6: FEATURES ═══════════════════════════════════════════════ -->
+<div class="step" id="step-6">
+  <div class="section-badge">Section 6</div>
+  <h2 class="step-title">Special Features & Functionality</h2>
+  <p class="step-desc">Select every feature / functionality you need. These affect the cost and timeline estimate.</p>
+
+  <div class="field">
+    <label>Select all required features</label>
+    <div class="check-grid">
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Contact / Inquiry Form</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>WhatsApp Chat Button</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Online Payment Integration</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>E-commerce / Shopping Cart</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Newsletter Subscription</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Social Media Feed Integration</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Live Chat Support</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Search Functionality</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Multi-language Support</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Google Maps Embed</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Photo / Video Gallery</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Countdown Timer</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>PDF Downloads</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>User Registration & Login</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Membership / Subscription</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Appointment / Booking System</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>QR Code Integration</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Push Notifications</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Certificate / Report Generator</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Staff Attendance System</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Any other features or specific requirements?</label>
+    <textarea id="s6_other" placeholder="Describe any feature not listed above and how it should work..."></textarea>
+  </div>
+</div>
+
+<!-- ═══ STEP 7: DESIGN ══════════════════════════════════════════════════ -->
+<div class="step" id="step-7">
+  <div class="section-badge">Section 7</div>
+  <h2 class="step-title">Design & Branding Preferences</h2>
+  <p class="step-desc">Your visual identity shapes first impressions. Be as specific as possible here.</p>
+
+  <div class="field">
+    <label>Do you have an existing logo?</label>
+    <div class="radio-row" id="s7_logo">
+      <div class="radio-item" onclick="selectRadio('s7_logo',this)"><div class="radio-dot"></div>Yes — will provide</div>
+      <div class="radio-item" onclick="selectRadio('s7_logo',this)"><div class="radio-dot"></div>No — need one created</div>
+      <div class="radio-item" onclick="selectRadio('s7_logo',this)"><div class="radio-dot"></div>Not sure yet</div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Brand Colours</label>
+      <input type="text" id="s7_colors" placeholder="e.g. #1565C0 (dark blue), gold, white"/>
+    </div>
+    <div class="field">
+      <label>Brand Fonts (if any)</label>
+      <input type="text" id="s7_fonts" placeholder="e.g. Poppins, Montserrat, Arial"/>
+    </div>
+  </div>
+  <div class="field">
+    <label>Preferred Website Style / Feel (select all that apply)</label>
+    <div class="check-grid">
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Modern & Minimalist</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Bold & Colorful</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Professional / Corporate</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Playful / Fun (kids/youth)</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Elegant / Luxury</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Traditional / Cultural</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Tech / Futuristic</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Warm / Friendly</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Dark Mode Theme</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Light & Airy</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Websites you LIKE (and what you like about them)</label>
+    <textarea id="s7_like" placeholder="e.g. https://apple.com — clean and minimal&#10;https://example.com — love the colors and layout"></textarea>
+  </div>
+  <div class="field">
+    <label>Websites you DISLIKE (and what you dislike)</label>
+    <textarea id="s7_dislike" placeholder="Helps us know exactly what to avoid..."></textarea>
+  </div>
+  <div class="field">
+    <label>Do you have a brand guideline / style guide?</label>
+    <div class="radio-row" id="s7_guide">
+      <div class="radio-item" onclick="selectRadio('s7_guide',this)"><div class="radio-dot"></div>Yes — will share</div>
+      <div class="radio-item" onclick="selectRadio('s7_guide',this)"><div class="radio-dot"></div>No</div>
+      <div class="radio-item" onclick="selectRadio('s7_guide',this)"><div class="radio-dot"></div>Partial / In progress</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Other design notes or preferences</label>
+    <textarea id="s7_notes" placeholder="Any specific layout ideas, elements you love, or anything else about the look and feel..."></textarea>
+  </div>
+</div>
+
+<!-- ═══ STEP 8: CONTENT ════════════════════════════════════════════════ -->
+<div class="step" id="step-8">
+  <div class="section-badge">Section 8</div>
+  <h2 class="step-title">Content & Media</h2>
+  <p class="step-desc">Content is the heart of the website. Tell us what you have and what you need us to create.</p>
+
+  <div class="note-box">📌 The more content you provide upfront, the faster and cheaper your project will be completed.</div>
+
+  <div class="field">
+    <label>Will you provide the written content (text)?</label>
+    <div class="yn-field"><span class="yn-label">Client will write all website text content</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you need us to write / copywrite the content?</label>
+    <div class="yn-field"><span class="yn-label">Developer writes text (blog posts, service descriptions, etc.)</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you have professional photos / images ready?</label>
+    <div class="yn-field"><span class="yn-label">Ready-to-use product photos, team photos, or office photos</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Partial</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you need stock photos or custom graphics?</label>
+    <div class="yn-field"><span class="yn-label">We source or design images for you</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you have a promotional video to embed?</label>
+    <div class="yn-field"><span class="yn-label">YouTube / Vimeo link or video file</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button></div></div>
+  </div>
+  <div class="field">
+    <label>What file formats can you provide?</label>
+    <input type="text" id="s8_formats" placeholder="e.g. Word (.docx), PDF, Google Docs, JPG, PNG, MP4"/>
+  </div>
+  <div class="field">
+    <label>List all content / materials you already have</label>
+    <textarea id="s8_assets" placeholder="e.g. Company logo (PNG), 10 product photos (JPG), business description in Word doc, 15 customer testimonials, promotional video (YouTube link)..."></textarea>
+  </div>
+</div>
+
+<!-- ═══ STEP 9: TECHNICAL ══════════════════════════════════════════════ -->
+<div class="step" id="step-9">
+  <div class="section-badge">Section 9</div>
+  <h2 class="step-title">Technical & Domain Information</h2>
+  <p class="step-desc">Existing infrastructure affects our build approach and cost estimate.</p>
+
+  <div class="field">
+    <label>Do you already own a domain name?</label>
+    <div class="yn-field"><span class="yn-label">e.g. www.yourbusiness.com or .com.ng</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button></div></div>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Domain Name (if owned)</label>
+      <input type="url" id="s9_domain" placeholder="www.yourbusiness.com"/>
+    </div>
+    <div class="field">
+      <label>Domain Registrar</label>
+      <input type="text" id="s9_registrar" placeholder="e.g. GoDaddy, Namecheap, Web4Africa"/>
+    </div>
+  </div>
+  <div class="field">
+    <label>Do you already have web hosting?</label>
+    <div class="yn-field"><span class="yn-label">An active hosting plan / server</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button></div></div>
+  </div>
+  <div class="field">
+    <label>Hosting Provider (if any)</label>
+    <input type="text" id="s9_host" placeholder="e.g. Hostinger, cPanel host, VPS, AWS"/>
+  </div>
+  <div class="field">
+    <label>Preferred Technology / Platform (if any)</label>
+    <select id="s9_tech">
+      <option value="">No preference / Developer decides</option>
+      <option>WordPress</option>
+      <option>React / Next.js</option>
+      <option>HTML + CSS + JavaScript</option>
+      <option>Django / Python</option>
+      <option>Node.js / Express</option>
+      <option>Shopify</option>
+      <option>Wix</option>
+      <option>Google Sites</option>
+      <option>Other (specify in notes)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>External Systems to Integrate</label>
+    <input type="text" id="s9_integrations" placeholder="e.g. Google Sheets, WhatsApp API, Paystack, CRM, SMS platform"/>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Payment Gateway (if needed)</label>
+      <select id="s9_payment">
+        <option value="">Not applicable</option>
+        <option>Paystack</option>
+        <option>Flutterwave</option>
+        <option>Stripe</option>
+        <option>PayPal</option>
+        <option>Bank Transfer only</option>
+        <option>Multiple gateways</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Transaction Currency</label>
+      <select id="s9_currency">
+        <option value="">Select...</option>
+        <option>NGN (₦ Naira)</option>
+        <option>USD ($)</option>
+        <option>GBP (£)</option>
+        <option>EUR (€)</option>
+        <option>Multiple currencies</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label>Does the site need to work offline / as a mobile app (PWA)?</label>
+    <div class="yn-field"><span class="yn-label">Progressive Web App capability</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you need Google Analytics / visitor tracking?</label>
+    <div class="yn-field"><span class="yn-label">Track visitors, page views, traffic sources</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you need SEO (Search Engine Optimisation) setup?</label>
+    <div class="yn-field"><span class="yn-label">Rank on Google for your keywords</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 10: BUDGET & PRIORITY ════════════════════════════════════ -->
+<div class="step" id="step-10">
+  <div class="section-badge">Section 10</div>
+  <h2 class="step-title">Priority & Budget</h2>
+  <p class="step-desc">Help us scope and schedule your project realistically.</p>
+
+  <div class="field">
+    <label>Rate the importance of each factor (1 = Low, 5 = Critical)</label>
+    <div id="ratings">
+      <div class="rating-group"><div class="rating-label">Speed (how fast the site loads)</div><div class="rating-stars" data-id="r1"><button class="star-btn" onclick="setRating('r1',1)">1</button><button class="star-btn" onclick="setRating('r1',2)">2</button><button class="star-btn" onclick="setRating('r1',3)">3</button><button class="star-btn" onclick="setRating('r1',4)">4</button><button class="star-btn" onclick="setRating('r1',5)">5</button></div></div>
+      <div class="rating-group"><div class="rating-label">Visual Design (how beautiful it looks)</div><div class="rating-stars" data-id="r2"><button class="star-btn" onclick="setRating('r2',1)">1</button><button class="star-btn" onclick="setRating('r2',2)">2</button><button class="star-btn" onclick="setRating('r2',3)">3</button><button class="star-btn" onclick="setRating('r2',4)">4</button><button class="star-btn" onclick="setRating('r2',5)">5</button></div></div>
+      <div class="rating-group"><div class="rating-label">SEO (ranking on Google)</div><div class="rating-stars" data-id="r3"><button class="star-btn" onclick="setRating('r3',1)">1</button><button class="star-btn" onclick="setRating('r3',2)">2</button><button class="star-btn" onclick="setRating('r3',3)">3</button><button class="star-btn" onclick="setRating('r3',4)">4</button><button class="star-btn" onclick="setRating('r3',5)">5</button></div></div>
+      <div class="rating-group"><div class="rating-label">Mobile Responsiveness</div><div class="rating-stars" data-id="r4"><button class="star-btn" onclick="setRating('r4',1)">1</button><button class="star-btn" onclick="setRating('r4',2)">2</button><button class="star-btn" onclick="setRating('r4',3)">3</button><button class="star-btn" onclick="setRating('r4',4)">4</button><button class="star-btn" onclick="setRating('r4',5)">5</button></div></div>
+      <div class="rating-group"><div class="rating-label">Security (SSL, data protection)</div><div class="rating-stars" data-id="r5"><button class="star-btn" onclick="setRating('r5',1)">1</button><button class="star-btn" onclick="setRating('r5',2)">2</button><button class="star-btn" onclick="setRating('r5',3)">3</button><button class="star-btn" onclick="setRating('r5',4)">4</button><button class="star-btn" onclick="setRating('r5',5)">5</button></div></div>
+      <div class="rating-group"><div class="rating-label">Number of Pages & Features</div><div class="rating-stars" data-id="r6"><button class="star-btn" onclick="setRating('r6',1)">1</button><button class="star-btn" onclick="setRating('r6',2)">2</button><button class="star-btn" onclick="setRating('r6',3)">3</button><button class="star-btn" onclick="setRating('r6',4)">4</button><button class="star-btn" onclick="setRating('r6',5)">5</button></div></div>
+      <div class="rating-group"><div class="rating-label">Post-launch Support & Maintenance</div><div class="rating-stars" data-id="r7"><button class="star-btn" onclick="setRating('r7',1)">1</button><button class="star-btn" onclick="setRating('r7',2)">2</button><button class="star-btn" onclick="setRating('r7',3)">3</button><button class="star-btn" onclick="setRating('r7',4)">4</button><button class="star-btn" onclick="setRating('r7',5)">5</button></div></div>
+    </div>
+  </div>
+  <hr class="divider"/>
+  <div class="field">
+    <label>Estimated Budget Range</label>
+    <select id="s10_budget">
+      <option value="">Select range...</option>
+      <option>Below ₦50,000</option>
+      <option>₦50,000 – ₦100,000</option>
+      <option>₦100,000 – ₦200,000</option>
+      <option>₦200,000 – ₦500,000</option>
+      <option>₦500,000+</option>
+      <option>$100 – $300</option>
+      <option>$300 – $800</option>
+      <option>$800 – $2,000</option>
+      <option>$2,000+</option>
+      <option>Open to discussion</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Payment Terms Preference</label>
+    <div class="radio-row" id="s10_payment">
+      <div class="radio-item" onclick="selectRadio('s10_payment',this)"><div class="radio-dot"></div>50% upfront + 50% on delivery</div>
+      <div class="radio-item" onclick="selectRadio('s10_payment',this)"><div class="radio-dot"></div>Milestone-based payments</div>
+      <div class="radio-item" onclick="selectRadio('s10_payment',this)"><div class="radio-dot"></div>Full payment upfront</div>
+      <div class="radio-item" onclick="selectRadio('s10_payment',this)"><div class="radio-dot"></div>Full payment on delivery</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>How did you hear about us?</label>
+    <select id="s10_referral">
+      <option value="">Select...</option>
+      <option>Referral from a friend/colleague</option>
+      <option>Social Media (Facebook, Instagram)</option>
+      <option>Google Search</option>
+      <option>WhatsApp</option>
+      <option>Flyer / Poster</option>
+      <option>Previous client</option>
+      <option>Other</option>
+    </select>
+  </div>
+</div>
+
+<!-- ═══ STEP 11: COMPETITORS ═══════════════════════════════════════════ -->
+<div class="step" id="step-11">
+  <div class="section-badge">Section 11</div>
+  <h2 class="step-title">Competitors & Market Position</h2>
+  <p class="step-desc">Understanding your competition helps us position your website strategically.</p>
+
+  <div class="field">
+    <label>List 3–5 direct competitors and their websites</label>
+    <textarea id="s11_competitors" style="min-height:140px" placeholder="1. Competitor Name | www.theirsite.com | What they do well | Their weakness&#10;2.&#10;3.&#10;4.&#10;5."></textarea>
+  </div>
+  <div class="field">
+    <label>What should your website do BETTER than competitors?</label>
+    <textarea id="s11_better" placeholder="e.g. Faster response to inquiries, clearer pricing, more professional look, better mobile experience..."></textarea>
+  </div>
+  <div class="field">
+    <label>Key search terms your customers use to find you</label>
+    <textarea id="s11_keywords" placeholder="e.g. 'best school in Osogbo', 'affordable caterer Ede', 'ICT training Nigeria', 'coding school for kids'..."></textarea>
+  </div>
+  <div class="field">
+    <label>Do you need ongoing monthly maintenance after launch?</label>
+    <div class="yn-field"><span class="yn-label">Updates, backups, security monitoring, new content</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Discuss later</button></div></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 12: FINAL & HANDOVER ══════════════════════════════════════ -->
+<div class="step" id="step-12">
+  <div class="section-badge">Section 12</div>
+  <h2 class="step-title">Post-Launch, Handover & Final Notes</h2>
+  <p class="step-desc">Planning ahead prevents problems after we go live. Nearly done!</p>
+
+  <div class="field">
+    <label>Will you manage the website yourself after launch?</label>
+    <div class="yn-field"><span class="yn-label">Self-manage updates, posts, and content</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Partially</button></div></div>
+  </div>
+  <div class="field">
+    <label>Do you need training on how to update the website?</label>
+    <div class="yn-field"><span class="yn-label">Video tutorial or hands-on training session</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button></div></div>
+  </div>
+  <div class="field">
+    <label>Website Administrator after handover</label>
+    <input type="text" id="s12_admin" placeholder="Name + email of person who will manage the site"/>
+  </div>
+  <div class="field">
+    <label>Do you need a backup and security monitoring plan?</label>
+    <div class="yn-field"><span class="yn-label">Regular backups, uptime monitoring, SSL renewal</span><div class="yn-options"><button class="yn-btn yes" onclick="toggleYN(this,'yes')">Yes</button><button class="yn-btn no" onclick="toggleYN(this,'no')">No</button><button class="yn-btn ns" onclick="toggleYN(this,'ns')">Not Sure</button></div></div>
+  </div>
+  <hr class="divider"/>
+  <div class="field">
+    <label>Any other information, special requirements, or questions for us</label>
+    <textarea id="s12_notes" style="min-height:140px" placeholder="Anything else we should know before we begin. The more you share, the better we can serve you..."></textarea>
+  </div>
+  <div class="note-box">
+    ✅ After submitting, you'll receive a summary of your responses. Please also send any supporting files (logo, photos, documents) via WhatsApp or email.
+  </div>
+
+  <div class="field">
+    <label>Declaration</label>
+    <p class="hint" style="font-size:12px; line-height:1.7;">By submitting this form, I confirm that the information provided is accurate and complete to the best of my knowledge. I understand that changes made after the project begins may attract additional costs and timeline adjustments.</p>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label>Full Name (Signature) *</label>
+      <input type="text" id="s12_sig_name" placeholder="Type your full name"/>
+    </div>
+    <div class="field">
+      <label>Date *</label>
+      <input type="date" id="s12_sig_date"/>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NAV BUTTONS ════════════════════════════════════════════════════ -->
+<div class="nav-btns" id="nav-btns">
+  <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" style="display:none">← Previous</button>
+  <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Next Section →</button>
+</div>
+
+<!-- ═══ SUBMIT SCREEN ══════════════════════════════════════════════════ -->
+<div id="submit-screen">
+  <div class="success-icon">✓</div>
+  <h2>Form Submitted!</h2>
+  <p>Thank you for completing the client intake form. We have everything we need to prepare your website proposal. Expect to hear from us within 24–48 hours.</p>
+  <div class="summary-box">
+    <h3>Your Submission Summary</h3>
+    <div id="summary-content"></div>
+  </div>
+  <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+</div>
+
+</div><!-- /.main -->
+
+<script>
+  const TOTAL = 12;
+  let current = 1;
+  const ratings = {};
+
+  // ── STEP DOTS ─────────────────────────────────────────
+  const dotsEl = document.getElementById('step-dots');
+  for(let i=1;i<=TOTAL;i++){
+    const d = document.createElement('div');
+    d.className = 'step-dot' + (i===1?' active':'');
+    d.title = 'Section ' + i;
+    d.onclick = () => { if(i < current){ goTo(i); } };
+    dotsEl.appendChild(d);
+  }
+
+  function updateProgress(){
+    const pct = Math.round((current/TOTAL)*100);
+    document.getElementById('progress-bar').style.width = pct+'%';
+    document.getElementById('progress-label').textContent = 'Section '+current+' of '+TOTAL;
+    document.getElementById('progress-count').textContent = pct+'% complete';
+    document.querySelectorAll('.step-dot').forEach((d,i)=>{
+      d.className = 'step-dot' + (i+1===current?' active':(i+1<current?' done':''));
+    });
+    document.getElementById('btn-prev').style.display = current>1?'flex':'none';
+    const nb = document.getElementById('btn-next');
+    if(current===TOTAL){
+      nb.textContent=''; nb.innerHTML='Submit Form ✓';
+      nb.className='btn btn-success';
+    } else {
+      nb.innerHTML='Next Section →';
+      nb.className='btn btn-primary';
+    }
+  }
+
+  function goTo(n){
+    document.getElementById('step-'+current)?.classList.remove('active');
+    current = n;
+    document.getElementById('step-'+current)?.classList.add('active');
+    updateProgress();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function nextStep(){
+    if(current < TOTAL){ goTo(current+1); }
+    else { submitForm(); }
+  }
+
+  function prevStep(){
+    if(current > 1) goTo(current-1);
+  }
+
+  // ── INTERACTIONS ───────────────────────────────────────
+  function toggleCheck(el){
+    el.classList.toggle('selected');
+    el.querySelector('.check-box').textContent = el.classList.contains('selected') ? '✓' : '';
+  }
+
+  function selectRadio(groupId, el){
+    document.getElementById(groupId)?.querySelectorAll('.radio-item').forEach(r=>{
+      r.classList.remove('selected');
+      r.querySelector('.radio-dot').style.background='';
+    });
+    el.classList.add('selected');
+  }
+
+  function toggleYN(btn, type){
+    const group = btn.closest('.yn-options');
+    group.querySelectorAll('.yn-btn').forEach(b=>{
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+  }
+
+  function setRating(id, val){
+    ratings[id] = val;
+    const row = document.querySelector(`.rating-stars[data-id="${id}"]`);
+    row.querySelectorAll('.star-btn').forEach((b,i)=>{
+      b.classList.toggle('active', i<val);
+    });
+  }
+
+  // ── SUBMIT ─────────────────────────────────────────────
+  function getChecked(containerSelector){
+    return Array.from(document.querySelectorAll(`${containerSelector} .check-item.selected`))
+      .map(el => el.textContent.replace('✓','').trim()).join(', ') || '—';
+  }
+  function getRadio(groupId){
+    const sel = document.getElementById(groupId)?.querySelector('.radio-item.selected');
+    return sel ? sel.textContent.trim() : '—';
+  }
+  function val(id){ return document.getElementById(id)?.value?.trim() || '—'; }
+
+  function submitForm(){
+    // Build summary
+    const rows = [
+      ['Client / Business', val('s1_name')],
+      ['Contact Person',    val('s1_contact') !== '—' ? val('s1_contact') : val('s1_name')],
+      ['Email',             val('s1_email')],
+      ['Phone',             val('s1_phone')],
+      ['Industry',          val('s2_industry')],
+      ['Website Goals',     getChecked('#goals-grid')],
+      ['Target Launch',     val('s3_launch')],
+      ['Budget Range',      val('s10_budget')],
+      ['Payment Terms',     getRadio('s10_payment')],
+      ['Technology Pref',   val('s9_tech')],
+      ['Signed By',         val('s12_sig_name')],
+      ['Date',              val('s12_sig_date')],
+    ];
+    const summaryEl = document.getElementById('summary-content');
+    summaryEl.innerHTML = rows.map(([k,v])=>
+      `<div class="summary-row"><span>${k}</span><span>${v}</span></div>`
+    ).join('');
+
+    document.getElementById('nav-btns').style.display = 'none';
+    document.querySelectorAll('.step').forEach(s=>s.style.display='none');
+    document.getElementById('submit-screen').style.display = 'block';
+    document.querySelector('.progress-wrap').style.display = 'none';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // Set today's date as default for signature date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('s12_sig_date').value = today;
+
+  updateProgress();
+</script>
+</body>
+</html>
