@@ -1160,6 +1160,9 @@
     });
   }
 
+  // ── CONFIG — paste your Apps Script Web App URL here ──
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwzN-Wg2Rrj3-s9IlANwKS_re1X3p9Pw-FZagzBRbI_vbKV4OrMBmqvZ4K88SC3sjV2/exec';
+
   // ── SUBMIT ─────────────────────────────────────────────
   function getChecked(containerSelector){
     return Array.from(document.querySelectorAll(`${containerSelector} .check-item.selected`))
@@ -1169,28 +1172,181 @@
     const sel = document.getElementById(groupId)?.querySelector('.radio-item.selected');
     return sel ? sel.textContent.trim() : '—';
   }
-  function val(id){ return document.getElementById(id)?.value?.trim() || '—'; }
+  function getYN(parentFieldEl){
+    const active = parentFieldEl?.querySelector('.yn-btn.active');
+    return active ? active.textContent.trim() : '—';
+  }
+  function v(id){ return document.getElementById(id)?.value?.trim() || '—'; }
 
-  function submitForm(){
-    // Build summary
+  function collectAllData(){
+    // Collect all Yes/No fields by their label text
+    const ynFields = document.querySelectorAll('.field');
+    const ynMap = {};
+    ynFields.forEach(f => {
+      const label = f.querySelector('label')?.textContent?.trim();
+      const active = f.querySelector('.yn-btn.active');
+      if(label && active) ynMap[label] = active.textContent.trim();
+    });
+
+    return {
+      // ── SECTION 1
+      'Business Name':              v('s1_name'),
+      'Contact Person':             v('s1_contact'),
+      'Job Title':                  v('s1_role'),
+      'Primary Email':              v('s1_email'),
+      'Secondary Email':            v('s1_email2'),
+      'Phone (WhatsApp)':           v('s1_phone'),
+      'Alternative Phone':          v('s1_phone2'),
+      'Address':                    v('s1_address'),
+      'State':                      v('s1_state'),
+      'Country':                    v('s1_country'),
+      'Preferred Channel':          v('s1_channel'),
+      'Best Time to Reach':         v('s1_time'),
+      // ── SECTION 2
+      'Business Description':       v('s2_desc'),
+      'Year Established':           v('s2_year'),
+      'Team Size':                  v('s2_size'),
+      'Industry':                   v('s2_industry'),
+      'Registration Number':        v('s2_reg'),
+      'Unique Selling Point':       v('s2_usp'),
+      'Products / Services':        v('s2_services'),
+      // ── SECTION 3
+      'Why Website Needed':         v('s3_why'),
+      'Website Goals':              getChecked('#goals-grid'),
+      'Success Definition':         v('s3_success'),
+      'Target Launch Date':         v('s3_launch'),
+      'Deadline Flexible':          getRadio('s3_flex'),
+      // ── SECTION 4
+      'Audience Age Group':         v('s4_age'),
+      'Audience Gender':            getRadio('s4_gender'),
+      'Audience Location':          v('s4_location'),
+      'Audience Income Level':      v('s4_income'),
+      'Ideal Customer':             v('s4_ideal'),
+      'Audience Language':          v('s4_lang'),
+      // ── SECTION 5
+      'Required Pages':             getChecked('#step-5'),
+      'Custom Pages':               v('s5_custom_pages'),
+      // ── SECTION 6
+      'Required Features':          getChecked('#step-6'),
+      'Other Features':             v('s6_other'),
+      // ── SECTION 7
+      'Has Logo':                   getRadio('s7_logo'),
+      'Brand Colours':              v('s7_colors'),
+      'Brand Fonts':                v('s7_fonts'),
+      'Design Style':               getChecked('#step-7'),
+      'Websites Liked':             v('s7_like'),
+      'Websites Disliked':          v('s7_dislike'),
+      'Has Brand Guide':            getRadio('s7_guide'),
+      'Design Notes':               v('s7_notes'),
+      // ── SECTION 8
+      'Client Writes Content':      ynMap['Will you provide the written content (text)?'] || '—',
+      'Needs Copywriting':          ynMap['Do you need us to write / copywrite the content?'] || '—',
+      'Has Photos':                 ynMap['Do you have professional photos / images ready?'] || '—',
+      'Needs Stock Photos':         ynMap['Do you need stock photos or custom graphics?'] || '—',
+      'Has Video':                  ynMap['Do you have a promotional video to embed?'] || '—',
+      'File Formats Available':     v('s8_formats'),
+      'Existing Assets':            v('s8_assets'),
+      // ── SECTION 9
+      'Has Domain':                 ynMap['Do you already own a domain name?'] || '—',
+      'Domain Name':                v('s9_domain'),
+      'Domain Registrar':           v('s9_registrar'),
+      'Has Hosting':                ynMap['Do you already have web hosting?'] || '—',
+      'Hosting Provider':           v('s9_host'),
+      'Tech Stack Preference':      v('s9_tech'),
+      'External Integrations':      v('s9_integrations'),
+      'Payment Gateway':            v('s9_payment'),
+      'Currency':                   v('s9_currency'),
+      'Needs PWA':                  ynMap['Does the site need to work offline / as a mobile app (PWA)?'] || '—',
+      'Needs Analytics':            ynMap['Do you need Google Analytics / visitor tracking?'] || '—',
+      'Needs SEO':                  ynMap['Do you need SEO (Search Engine Optimisation) setup?'] || '—',
+      // ── SECTION 10
+      'Priority: Speed':            ratings['r1'] || '—',
+      'Priority: Design':           ratings['r2'] || '—',
+      'Priority: SEO':              ratings['r3'] || '—',
+      'Priority: Mobile':           ratings['r4'] || '—',
+      'Priority: Security':         ratings['r5'] || '—',
+      'Priority: Features':         ratings['r6'] || '—',
+      'Priority: Maintenance':      ratings['r7'] || '—',
+      'Budget Range':               v('s10_budget'),
+      'Payment Terms':              getRadio('s10_payment'),
+      'How They Found Us':          v('s10_referral'),
+      // ── SECTION 11
+      'Competitors':                v('s11_competitors'),
+      'Better Than Competitors':    v('s11_better'),
+      'SEO Keywords':               v('s11_keywords'),
+      'Needs Monthly Maintenance':  ynMap['Do you need ongoing monthly maintenance after launch?'] || '—',
+      // ── SECTION 12
+      'Self-manages Site':          ynMap['Will you manage the website yourself after launch?'] || '—',
+      'Needs Training':             ynMap['Do you need training on how to update the website?'] || '—',
+      'Site Administrator':         v('s12_admin'),
+      'Needs Backup Plan':          ynMap['Do you need a backup and security monitoring plan?'] || '—',
+      'Additional Notes':           v('s12_notes'),
+      'Signed By':                  v('s12_sig_name'),
+      'Submission Date':            v('s12_sig_date'),
+      'Submitted At':               new Date().toLocaleString('en-NG', {timeZone:'Africa/Lagos'}),
+    };
+  }
+
+  function showLoading(on){
+    const btn = document.getElementById('btn-next');
+    btn.disabled = on;
+    btn.innerHTML = on
+      ? '<span style="display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending...</span>'
+      : 'Submit Form ✓';
+  }
+
+  async function submitForm(){
+    // Validate required fields
+    const name = document.getElementById('s1_name')?.value?.trim();
+    const email = document.getElementById('s1_email')?.value?.trim();
+    const phone = document.getElementById('s1_phone')?.value?.trim();
+    const sigName = document.getElementById('s12_sig_name')?.value?.trim();
+    if(!name){ alert('Please fill in the Business Name (Section 1).'); goTo(1); return; }
+    if(!email){ alert('Please fill in the Primary Email (Section 1).'); goTo(1); return; }
+    if(!phone){ alert('Please fill in the Phone Number (Section 1).'); goTo(1); return; }
+    if(!sigName){ alert('Please type your name in the Declaration field (Section 12).'); return; }
+
+    if(!SHEET_URL || SHEET_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){
+      alert('⚠️ No Google Sheet URL configured.\n\nPlease paste your Apps Script Web App URL into the SHEET_URL variable at the top of the <script> section.');
+      return;
+    }
+
+    showLoading(true);
+
+    const data = collectAllData();
+
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',           // Apps Script requires no-cors
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      // no-cors means we can't read the response — assume success if no throw
+      showSuccess(data);
+    } catch(err) {
+      showLoading(false);
+      alert('❌ Submission failed. Please check your internet connection and try again.\n\nError: ' + err.message);
+    }
+  }
+
+  function showSuccess(data){
     const rows = [
-      ['Client / Business', val('s1_name')],
-      ['Contact Person',    val('s1_contact') !== '—' ? val('s1_contact') : val('s1_name')],
-      ['Email',             val('s1_email')],
-      ['Phone',             val('s1_phone')],
-      ['Industry',          val('s2_industry')],
-      ['Website Goals',     getChecked('#goals-grid')],
-      ['Target Launch',     val('s3_launch')],
-      ['Budget Range',      val('s10_budget')],
-      ['Payment Terms',     getRadio('s10_payment')],
-      ['Technology Pref',   val('s9_tech')],
-      ['Signed By',         val('s12_sig_name')],
-      ['Date',              val('s12_sig_date')],
+      ['Client / Business', data['Business Name']],
+      ['Email',             data['Primary Email']],
+      ['Phone',             data['Phone (WhatsApp)']],
+      ['Industry',          data['Industry']],
+      ['Website Goals',     data['Website Goals']],
+      ['Target Launch',     data['Target Launch Date']],
+      ['Budget Range',      data['Budget Range']],
+      ['Payment Terms',     data['Payment Terms']],
+      ['Tech Preference',   data['Tech Stack Preference']],
+      ['Signed By',         data['Signed By']],
+      ['Submitted At',      data['Submitted At']],
     ];
-    const summaryEl = document.getElementById('summary-content');
-    summaryEl.innerHTML = rows.map(([k,v])=>
-      `<div class="summary-row"><span>${k}</span><span>${v}</span></div>`
-    ).join('');
+    document.getElementById('summary-content').innerHTML = rows
+      .map(([k,v])=>`<div class="summary-row"><span>${k}</span><span>${v}</span></div>`)
+      .join('');
 
     document.getElementById('nav-btns').style.display = 'none';
     document.querySelectorAll('.step').forEach(s=>s.style.display='none');
